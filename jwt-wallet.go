@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/cosmos/btcutil/bech32"
-	"github.com/provenance-io/kong-jwt-wallet/grants"
-	"github.com/provenance-io/kong-jwt-wallet/signing"
+	"github.com/FigureTechnologies/kong-jwt-wallet/grants"
+	"github.com/FigureTechnologies/kong-jwt-wallet/signing"
 	"golang.org/x/crypto/ripemd160"
 
 	"github.com/Kong/go-pdk"

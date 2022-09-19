@@ -3,7 +3,7 @@ RUN apk --no-cache --update add build-base
 ADD . /app/
 WORKDIR /app
 # Once the repo made pubilc, this can become:
-## go install github.com/provenance-io/kong-jwt-wallet/cmd/jwt-wallet@latest
+## go install github.com/FigureTechnologies/kong-jwt-wallet/cmd/jwt-wallet@latest
 RUN go build -o jwt-wallet ./cmd/jwt-wallet
 
 FROM kong:2.7.0-alpine

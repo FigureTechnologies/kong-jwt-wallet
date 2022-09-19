@@ -9,7 +9,7 @@ import (
 	secp256k1 "github.com/btcsuite/btcd/btcec"
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/provenance-io/kong-jwt-wallet/signing"
+	"github.com/FigureTechnologies/kong-jwt-wallet/signing"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 		RegisteredClaims: *&jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Date(2099, 1, 1, 0, 0, 0, 0, loc)),
 			IssuedAt:  jwt.NewNumericDate(time.Date(2021, 1, 1, 0, 0, 0, 0, loc)),
-			Issuer:    "provenance.io",
+			Issuer:    "tech.figure",
 			Subject:   base64.RawURLEncoding.EncodeToString(pubk.SerializeCompressed()),
 		},
 	}
