@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/Kong/go-pdk/server"
 
-	jwtwallet "github.com/provenance-io/kong-jwt-wallet"
+	jwtwallet "github.com/FigureTechnologies/kong-jwt-wallet"
 )
 
 var (

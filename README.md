@@ -28,7 +28,7 @@ Wallet access header content:
 
 ## Getting started
 
-When using this plugin you can use `go install github.com/provenance-io/kong-jwt-wallet/cmd/jwt-wallet@v0.10.0` directly or download a release version (soon to come)
+When using this plugin you can use `go install github.com/FigureTechnologies/kong-jwt-wallet/cmd/jwt-wallet@v0.10.0` directly or download a release version (soon to come)
 
 ### Configuration
 

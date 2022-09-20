@@ -12,9 +12,9 @@ import (
 	"github.com/Kong/go-pdk/test"
 	secp256k1 "github.com/btcsuite/btcd/btcec"
 	"github.com/golang-jwt/jwt/v4"
-	jwtwallet "github.com/provenance-io/kong-jwt-wallet"
-	"github.com/provenance-io/kong-jwt-wallet/grants"
-	"github.com/provenance-io/kong-jwt-wallet/signing"
+	jwtwallet "github.com/FigureTechnologies/kong-jwt-wallet"
+	"github.com/FigureTechnologies/kong-jwt-wallet/grants"
+	"github.com/FigureTechnologies/kong-jwt-wallet/signing"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -15,7 +15,7 @@ ifeq ($(UNAME_M),x86_64)
 	ARCH=amd64
 endif
 
-RELEASE_ZIP_BASE=provenance-$(UNAME_S)-$(ARCH)
+RELEASE_ZIP_BASE=figtech-$(UNAME_S)-$(ARCH)
 RELEASE_ZIP_NAME=$(RELEASE_ZIP_BASE)-$(VERSION).zip
 RELEASE_ZIP=$(BUILDDIR)/$(RELEASE_ZIP_NAME)
 
@@ -39,7 +39,7 @@ linux-release:
 .PHONY: lint
 lint:
 	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "*.pb.go" | xargs gofmt -w -d -s
-	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "*.pb.go" -not -path "*/statik*" | xargs goimports -w -local github.com/provenance-io/kong-jwt-wallet
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "*.pb.go" -not -path "*/statik*" | xargs goimports -w -local github.com/FigureTechnologies/kong-jwt-wallet
 
 .PHONY: http
 http:
