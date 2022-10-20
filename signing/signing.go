@@ -39,9 +39,12 @@ func ParseKey(kong *pdk.PDK) func(token *jwt.Token) (interface{}, error) {
 			return nil, fmt.Errorf("no subject")
 		}
 		keyB64 := strings.Split(sub, ",")[0]
-		keyBytes, err := base64.RawURLEncoding.DecodeString(keyB64)
+		var keyBytes, err = base64.RawStdEncoding.DecodeString(keyB64)
 		if err != nil {
-			return nil, err
+			keyBytes, err = base64.RawURLEncoding.DecodeString(keyB64)
+			if err != nil {
+				return nil, err
+			}
 		}
 		pubk, err := secp256k1.ParsePubKey(keyBytes, secp256k1.S256())
 		if err != nil {
