@@ -68,7 +68,7 @@ func TestMissingAddrClaim(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
 	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
 
-	claims := GenerateClaims("", pubk, true)
+	claims := GenerateClaims("", pubk, base64.RawURLEncoding)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
 
@@ -89,7 +89,7 @@ func TestMissingSubClaim(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
 	prvk, _ := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
 
-	claims := GenerateClaims("tbMadeUpAddr", nil, true)
+	claims := GenerateClaims("tbMadeUpAddr", nil, base64.RawURLEncoding)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
 
@@ -109,7 +109,7 @@ func TestExpiredToken(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
 	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
 
-	claims := GenerateClaims("tb1MadeUpAddr", pubk, true)
+	claims := GenerateClaims("tb1MadeUpAddr", pubk, base64.RawURLEncoding)
 	claims.ExpiresAt = jwt.NewNumericDate(time.Date(1999, 12, 31, 11, 10, 0, 0, time.Local))
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
@@ -129,7 +129,7 @@ func TestExpiredToken(t *testing.T) {
 func TestValidUrlEncodedJwt(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
 	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
-	claims := GenerateClaims("tp1y34frcm3hmnmgszmnxufcyw4aeslplsz8hkuxv", pubk, true)
+	claims := GenerateClaims("tp1y34frcm3hmnmgszmnxufcyw4aeslplsz8hkuxv", pubk, base64.RawURLEncoding)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
 
@@ -159,7 +159,7 @@ func TestValidUrlEncodedJwt(t *testing.T) {
 func TestValidNonUrlEncodedJwt(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
 	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
-	claims := GenerateClaims("tp1y34frcm3hmnmgszmnxufcyw4aeslplsz8hkuxv", pubk, false)
+	claims := GenerateClaims("tp1y34frcm3hmnmgszmnxufcyw4aeslplsz8hkuxv", pubk, base64.RawStdEncoding)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
 
@@ -190,7 +190,7 @@ func TestValidJwtWithEmptyRbacUrl(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
 	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
 	addr := "tp1y34frcm3hmnmgszmnxufcyw4aeslplsz8hkuxv"
-	claims := GenerateClaims(addr, pubk, true)
+	claims := GenerateClaims(addr, pubk, base64.RawURLEncoding)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
 
@@ -216,7 +216,7 @@ func TestIncorrectAddress(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
 	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
 
-	claims := GenerateClaims("tp1rr4d0eu62pgt4edw38d2ev27798pfhdhp5ttha", pubk, true)
+	claims := GenerateClaims("tp1rr4d0eu62pgt4edw38d2ev27798pfhdhp5ttha", pubk, base64.RawURLEncoding)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
 
@@ -233,14 +233,10 @@ func TestIncorrectAddress(t *testing.T) {
 	assert.Equal(t, "address does not match public key", env.ClientRes.Body)
 }
 
-func GenerateClaims(addr string, pubKey *secp256k1.PublicKey, urlEncodeKey bool) *signing.Claims {
+func GenerateClaims(addr string, pubKey *secp256k1.PublicKey, encoding *base64.Encoding) *signing.Claims {
 	compressedKey := ""
 	if pubKey != nil {
-		if urlEncodeKey {
-			compressedKey = base64.RawURLEncoding.EncodeToString(pubKey.SerializeCompressed())
-		} else {
-			compressedKey = base64.RawStdEncoding.EncodeToString(pubKey.SerializeCompressed())
-		}
+		compressedKey = encoding.EncodeToString(pubKey.SerializeCompressed())
 	}
 	loc, _ := time.LoadLocation("GMT")
 	return &signing.Claims{
