@@ -8,9 +8,9 @@ import (
 	"hash"
 	"strings"
 
-	"github.com/cosmos/btcutil/bech32"
 	"github.com/FigureTechnologies/kong-jwt-wallet/grants"
 	"github.com/FigureTechnologies/kong-jwt-wallet/signing"
+	"github.com/cosmos/btcutil/bech32"
 	"golang.org/x/crypto/ripemd160"
 
 	"github.com/Kong/go-pdk"
@@ -102,25 +102,24 @@ func (conf Config) Access(kong *pdk.PDK) {
 var parser = jwt.NewParser()
 
 func handleGrantedAccess(token *jwt.Token, url string, apiKey string, kong *pdk.PDK) (*grants.SubjectResponse, string, error) {
-	if claims, ok := token.Claims.(*signing.Claims); ok {
-		if claims.Addr == "" {
-			return nil, "", fmt.Errorf("missing addr claim")
-		}
-
-		if !verifyAddress(claims.Addr, claims.Subject, kong) {
-			return nil, "", fmt.Errorf("address does not match public key")
-		}
-
-		if url != "" {
-			subjectResponse, err := grants.GetGrants(url, claims.Addr, apiKey)
-			if err != nil {
-				return nil, "", err
-			}
-			return subjectResponse, claims.Addr, nil
-		}
+	claims, ok := token.Claims.(*signing.Claims)
+	if !ok {
+		return nil, "", fmt.Errorf("malformed claims")
+	}
+	if claims.Addr == "" {
+		return nil, "", fmt.Errorf("missing addr claim")
+	}
+	if err := verifyAddress(claims.Addr, claims.Subject); err != nil {
+		return nil, "", fmt.Errorf("address does not match public key: %w", err)
+	}
+	if url == "" {
 		return nil, claims.Addr, nil
 	}
-	return nil, "", fmt.Errorf("malformed claims")
+	subjectResponse, err := grants.GetGrants(url, claims.Addr, apiKey)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get grants: %w", err)
+	}
+	return subjectResponse, claims.Addr, nil
 }
 
 func handleToken(kong *pdk.PDK, tokenString string) (*jwt.Token, error) {
@@ -135,40 +134,35 @@ func handleToken(kong *pdk.PDK, tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func verifyAddress(addr string, pubKey string, kong *pdk.PDK) bool {
+func verifyAddress(addr string, pubKey string) error {
 	separator := strings.LastIndex(addr, "1")
-
 	if separator < 0 {
-		kong.Log.Err("address missing 1 separator")
-		return false
+		return fmt.Errorf("address missing `1` separator")
 	}
 
 	hrp := addr[0:separator]
-
 	keyB64 := strings.Split(pubKey, ",")[0]
 	keyBytes, err := base64.RawURLEncoding.DecodeString(keyB64)
-
 	if err != nil {
-		kong.Log.Err("Could not decode public key")
-		return false
+		return fmt.Errorf("failed to url decode key: %w", err)
 	}
 
 	hash160Bytes := Hash160(keyBytes)
-
 	dataBits, err := bech32.ConvertBits(hash160Bytes, 8, 5, true)
 	if err != nil {
-		kong.Log.Err("error: %v", err)
-		return false
+		return fmt.Errorf("failed to convert bits: %w", err)
 	}
 
 	pubKeyAddr, err := bech32.Encode(hrp, dataBits)
-
 	if err != nil {
-		kong.Log.Err("error: %v", err)
-		return false
+		return fmt.Errorf("failed to bech32 encode addr: %w", err)
 	}
 
-	return strings.EqualFold(addr, pubKeyAddr)
+	eq := strings.EqualFold(addr, pubKeyAddr)
+	if !eq {
+		return fmt.Errorf("addr invalid: %s != %s", addr, pubKeyAddr)
+	}
+	return nil
 }
 
 // Calculate the hash of hasher over buf.
