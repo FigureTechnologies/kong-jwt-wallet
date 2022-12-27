@@ -200,7 +200,7 @@ func TestIncorrectAddress(t *testing.T) {
 	env.DoHttp(config)
 
 	assert.Equal(t, 400, env.ClientRes.Status)
-	assert.Equal(t, "address does not match public key", env.ClientRes.Body)
+	assert.Contains(t, env.ClientRes.Body, "address does not match public key")
 }
 
 func GenerateClaims(addr string, pubKey *secp256k1.PublicKey) *signing.Claims {
