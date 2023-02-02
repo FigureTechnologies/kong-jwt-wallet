@@ -1,6 +1,6 @@
 module github.com/FigureTechnologies/kong-jwt-wallet
 
-go 1.17
+go 1.20
 
 require (
 	github.com/Kong/go-pdk v0.7.1
