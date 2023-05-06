@@ -8,9 +8,9 @@ import (
 	"hash"
 	"strings"
 
-	"github.com/cosmos/btcutil/bech32"
 	"github.com/FigureTechnologies/kong-jwt-wallet/grants"
 	"github.com/FigureTechnologies/kong-jwt-wallet/signing"
+	"github.com/cosmos/btcutil/bech32"
 	"golang.org/x/crypto/ripemd160"
 
 	"github.com/Kong/go-pdk"
@@ -146,11 +146,14 @@ func verifyAddress(addr string, pubKey string, kong *pdk.PDK) bool {
 	hrp := addr[0:separator]
 
 	keyB64 := strings.Split(pubKey, ",")[0]
-	keyBytes, err := base64.RawURLEncoding.DecodeString(keyB64)
+	var keyBytes, err = base64.RawStdEncoding.DecodeString(keyB64)
 
 	if err != nil {
-		kong.Log.Err("Could not decode public key")
-		return false
+		keyBytes, err = base64.RawURLEncoding.DecodeString(keyB64)
+		if err != nil {
+			kong.Log.Err("Could not decode public key")
+			return false
+		}
 	}
 
 	hash160Bytes := Hash160(keyBytes)
