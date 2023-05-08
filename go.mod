@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Kong/go-pdk v0.7.1
-	github.com/btcsuite/btcd v0.22.0-beta
+	github.com/btcsuite/btcd v0.22.2
 	github.com/golang-jwt/jwt/v4 v4.2.0
 )
 
