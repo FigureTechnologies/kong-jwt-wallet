@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/cosmos/btcutil v1.0.4
+	github.com/cosmos/btcutil v1.0.5
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
