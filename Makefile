@@ -82,3 +82,7 @@ token:
 .PHONY: clean
 clean:
 	rm -f *.so jwt_wallet main main.so
+
+.PHONY: test
+test:
+	go test ./...

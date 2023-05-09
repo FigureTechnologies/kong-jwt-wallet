@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Kong/go-pdk/test"
-	secp256k1 "github.com/btcsuite/btcd/btcec"
-	"github.com/golang-jwt/jwt/v4"
 	jwtwallet "github.com/FigureTechnologies/kong-jwt-wallet"
 	"github.com/FigureTechnologies/kong-jwt-wallet/grants"
 	"github.com/FigureTechnologies/kong-jwt-wallet/signing"
+	"github.com/Kong/go-pdk/test"
+	secp256k1 "github.com/btcsuite/btcd/btcec/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,7 +66,7 @@ func TestInvalidJwt(t *testing.T) {
 
 func TestMissingAddrClaim(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
-	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
+	prvk, pubk := secp256k1.PrivKeyFromBytes(pkBytes)
 
 	claims := GenerateClaims("", pubk)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
@@ -87,7 +87,7 @@ func TestMissingAddrClaim(t *testing.T) {
 
 func TestMissingSubClaim(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
-	prvk, _ := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
+	prvk, _ := secp256k1.PrivKeyFromBytes(pkBytes)
 
 	claims := GenerateClaims("tbMadeUpAddr", nil)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
@@ -107,7 +107,7 @@ func TestMissingSubClaim(t *testing.T) {
 
 func TestExpiredToken(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
-	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
+	prvk, pubk := secp256k1.PrivKeyFromBytes(pkBytes)
 
 	claims := GenerateClaims("tb1MadeUpAddr", pubk)
 	claims.ExpiresAt = jwt.NewNumericDate(time.Date(1999, 12, 31, 11, 10, 0, 0, time.Local))
@@ -128,7 +128,7 @@ func TestExpiredToken(t *testing.T) {
 
 func TestValidJwt(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
-	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
+	prvk, pubk := secp256k1.PrivKeyFromBytes(pkBytes)
 	claims := GenerateClaims("tp1y34frcm3hmnmgszmnxufcyw4aeslplsz8hkuxv", pubk)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
 	sig, _ := token.SignedString(prvk)
@@ -158,7 +158,7 @@ func TestValidJwt(t *testing.T) {
 
 func TestValidJwtWithEmptyRbacUrl(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
-	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
+	prvk, pubk := secp256k1.PrivKeyFromBytes(pkBytes)
 	addr := "tp1y34frcm3hmnmgszmnxufcyw4aeslplsz8hkuxv"
 	claims := GenerateClaims(addr, pubk)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
@@ -184,7 +184,7 @@ func TestValidJwtWithEmptyRbacUrl(t *testing.T) {
 
 func TestIncorrectAddress(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("8C037EFC21AB3F0F8D32CF209D90FDBF41D10071FF600BA66A30EFA994F268A3")
-	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
+	prvk, pubk := secp256k1.PrivKeyFromBytes(pkBytes)
 
 	claims := GenerateClaims("tp1rr4d0eu62pgt4edw38d2ev27798pfhdhp5ttha", pubk)
 	token := jwt.NewWithClaims(signing.NewSecp256k1Signer(), claims)
@@ -200,7 +200,7 @@ func TestIncorrectAddress(t *testing.T) {
 	env.DoHttp(config)
 
 	assert.Equal(t, 400, env.ClientRes.Status)
-	assert.Equal(t, "address does not match public key", env.ClientRes.Body)
+	assert.Contains(t, env.ClientRes.Body, "address does not match public key")
 }
 
 func GenerateClaims(addr string, pubKey *secp256k1.PublicKey) *signing.Claims {

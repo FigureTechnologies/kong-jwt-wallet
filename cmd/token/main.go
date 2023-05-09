@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	secp256k1 "github.com/btcsuite/btcd/btcec"
+	secp256k1 "github.com/btcsuite/btcd/btcec/v2"
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/FigureTechnologies/kong-jwt-wallet/signing"
@@ -17,7 +17,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	prvk, pubk := secp256k1.PrivKeyFromBytes(secp256k1.S256(), pkBytes)
+	prvk, pubk := secp256k1.PrivKeyFromBytes(pkBytes)
 	fmt.Printf("prvKey:%X\n", prvk.Serialize())
 	fmt.Printf("pubKey:%X\n", pubk.SerializeCompressed())
 

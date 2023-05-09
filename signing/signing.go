@@ -1,15 +1,20 @@
 package signing
 
 import (
-	"crypto/ecdsa"
+	goecdsa "crypto/ecdsa"
+	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"math/big"
+	"reflect"
 	"strings"
 
 	"github.com/Kong/go-pdk"
-	secp256k1 "github.com/btcsuite/btcd/btcec"
+	ecdsa "github.com/btcsuite/btcd/btcec/v2/ecdsa"
+
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -43,7 +48,7 @@ func ParseKey(kong *pdk.PDK) func(token *jwt.Token) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		pubk, err := secp256k1.ParsePubKey(keyBytes, secp256k1.S256())
+		pubk, err := secp256k1.ParsePubKey(keyBytes)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +61,7 @@ type secp256k1Sig struct {
 
 var _ jwt.SigningMethod = (*secp256k1Sig)(nil)
 
-func (s secp256k1Sig) Verify_deprecated(signingString, signature string, key interface{}) error {
+func (t secp256k1Sig) Verify_deprecated(signingString, signature string, key interface{}) error {
 	fmt.Printf("verify(" + signingString + "," + signature + ")")
 
 	sigBytes, err := base64.RawURLEncoding.DecodeString(signature)
@@ -64,21 +69,21 @@ func (s secp256k1Sig) Verify_deprecated(signingString, signature string, key int
 		return err
 	}
 
-	sig, err := secp256k1.ParseSignature(sigBytes, secp256k1.S256())
+	sig, err := ecdsa.ParseSignature(sigBytes)
 	if err != nil {
 		return fmt.Errorf("sig parse failed: %w, %x, %s, %s", err, sigBytes, signingString, signature)
 	}
 
 	hasher := sha256.New()
 	hasher.Write([]byte(signingString))
-	ok := sig.Verify(hasher.Sum(nil), key.(*secp256k1.PublicKey))
+	ok := sig.Verify(hasher.Sum(nil), key.(*btcec.PublicKey))
 	if !ok {
 		return fmt.Errorf("sig verify failed")
 	}
 	return nil
 }
 
-func (s secp256k1Sig) Verify(signingString, signature string, key interface{}) error {
+func (t secp256k1Sig) Verify(signingString, signature string, key interface{}) error {
 	pub, ok := key.(*secp256k1.PublicKey)
 	if !ok {
 		fmt.Println("Wrong fromat")
@@ -99,28 +104,34 @@ func (s secp256k1Sig) Verify(signingString, signature string, key interface{}) e
 	bir := new(big.Int).SetBytes(sig[:32])   // R
 	bis := new(big.Int).SetBytes(sig[32:64]) // S
 
-	if !ecdsa.Verify(pub.ToECDSA(), hasher.Sum(nil), bir, bis) {
+	if !goecdsa.Verify(pub.ToECDSA(), hasher.Sum(nil), bir, bis) {
 		return fmt.Errorf("could not verify")
 	}
 
 	return nil
 }
 
-func (s secp256k1Sig) Sign(signingString string, key interface{}) (string, error) {
+func (t secp256k1Sig) Sign(signingString string, key interface{}) (string, error) {
+	pkey, ok := key.(*btcec.PrivateKey)
+	if !ok {
+		return "", fmt.Errorf("expected btcec.PrivateKey, found %s", reflect.TypeOf(key))
+	}
+
 	hasher := sha256.New()
 	hasher.Write([]byte(signingString))
-	sig, err := key.(*secp256k1.PrivateKey).Sign(hasher.Sum(nil))
+
+	r, s, err := goecdsa.Sign(crand.Reader, pkey.ToECDSA(), hasher.Sum(nil))
 	if err != nil {
 		return "", err
 	}
 
 	siggy := make([]byte, 0)
-	siggy = append(siggy, sig.R.Bytes()...)
-	siggy = append(siggy, sig.S.Bytes()...)
+	siggy = append(siggy, r.Bytes()...)
+	siggy = append(siggy, s.Bytes()...)
 	return base64.RawURLEncoding.EncodeToString(siggy), nil
 }
 
-func (s secp256k1Sig) Alg() string {
+func (t secp256k1Sig) Alg() string {
 	return "ES256K"
 }
 
