@@ -46,7 +46,7 @@ jobs:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
         run: |
           gon -log-level=info -log-json ./gon.json
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: osx-zip
           path: build/*.zip
@@ -66,7 +66,7 @@ jobs:
       - name: Build linux binary
         run: |
           make release linux-release
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: linux-zip
           path: build/*.zip
