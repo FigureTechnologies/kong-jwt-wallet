@@ -18,11 +18,12 @@ import (
 )
 
 type Config struct {
-	RBAC         string `json:"rbac"`
-	APIKey       string `json:"apikey"`
-	AuthHeader   string `json:"authHeader"`
-	AccessHeader string `json:"accessHeader"`
-	SenderHeader string `json:"senderHeader"`
+	RBAC            string `json:"rbac"`
+	APIKey          string `json:"apikey"`
+	AuthHeader      string `json:"authHeader"`
+	AccessHeader    string `json:"accessHeader"`
+	SenderHeader    string `json:"senderHeader"`
+	PublicKeyHeader string `json:"publicKeyHeader"`
 }
 
 func New() interface{} {
@@ -83,6 +84,7 @@ func (conf Config) Access(kong *pdk.PDK) {
 		kong.Response.Exit(500, "something went wrong", x)
 		return
 	}
+
 	if conf.AccessHeader == "" {
 		conf.AccessHeader = "x-wallet-access"
 	}
@@ -93,6 +95,10 @@ func (conf Config) Access(kong *pdk.PDK) {
 
 	if conf.SenderHeader != "" {
 		kong.ServiceRequest.SetHeader(conf.SenderHeader, sender)
+	}
+
+	if conf.PublicKeyHeader != "" {
+		kong.ServiceRequest.SetHeader(conf.PublicKeyHeader, tok.Claims.(*signing.Claims).Subject)
 	}
 
 	kong.Log.Warn(tok)
