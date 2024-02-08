@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_init:
-    runs-on: ubuntu-latest
+    runs-on: figure-linux-standard
     name: Build Init
     steps:
       - id: version
@@ -52,7 +52,7 @@ jobs:
           path: build/*.zip
 
   build_linux:
-    runs-on: ubuntu-latest
+    runs-on: figure-linux-standard
     needs:
       - build_init
     name: Build Linux
@@ -72,7 +72,7 @@ jobs:
           path: build/*.zip
 
   create_release:
-    runs-on: ubuntu-latest
+    runs-on: figure-linux-standard
     needs:
       - build_init
       - build_osx
@@ -96,7 +96,7 @@ jobs:
       release_url: ${{ steps.create_release.outputs.upload_url }}
 
   update_release:
-    runs-on: ubuntu-latest
+    runs-on: figure-linux-standard
     needs:
       - build_init
       - create_release
