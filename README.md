@@ -48,7 +48,8 @@ Configuration options:
 * `authHeader` - The name of the request header containing the JWT. Defaults to "Authorization". 
   - Requires the Bearer token format e.g {authHeader} Bearer {jwt}
 * `accessHeader` - The name of the header to inject with the wallet access JSON. Defaults to "x-wallet-access". Only injected when rbac configuration is set
-* `senderHeader` - The name of the header to inject with the addr claim of the user signed JWT. If not set then will not inject
+* `senderHeader` - The name of the header to inject with the `addr` claim of the user signed JWT. If not set then will not inject
+* `publicKeyHeader` - The name of the header to inject with the public key (`sub` claim) of the wallet. If not set then will not inject.
 
 *= Required to get delegated access rights
 

@@ -148,10 +148,12 @@ func TestValidJwt(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
+	config.PublicKeyHeader = "x-wallet-public-key"
 	env.DoHttp(config)
 
 	assert.Equal(t, 200, env.ClientRes.Status)
 	assert.NotEmpty(t, env.ServiceReq.Headers.Get("x-wallet-access"))
+	assert.Equal(t, env.ServiceReq.Headers.Get("x-wallet-public-key"), claims.Subject)
 	assert.Empty(t, env.ServiceReq.Headers.Get("x-sender"))
 	assert.Equal(t, subjectJSONString, env.ServiceReq.Headers.Get("x-wallet-access"))
 }
