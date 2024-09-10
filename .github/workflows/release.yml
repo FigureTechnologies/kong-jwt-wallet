@@ -23,13 +23,13 @@ jobs:
     name: Build OSX
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install osx tools
         run: |
           brew tap mitchellh/gon
           brew install mitchellh/gon/gon
       - name: Setup go
-        uses: actions/setup-go@v4.0.0
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.build_init.outputs.go_version }}
       - name: Import Code-Signing Certificates
@@ -46,7 +46,7 @@ jobs:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
         run: |
           gon -log-level=info -log-json ./gon.json
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: osx-zip
           path: build/*.zip
@@ -58,15 +58,15 @@ jobs:
     name: Build Linux
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup go
-        uses: actions/setup-go@v4.0.0
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.build_init.outputs.go_version }}
       - name: Build linux binary
         run: |
           make release linux-release
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: linux-zip
           path: build/*.zip
@@ -80,7 +80,7 @@ jobs:
     name: Create Release
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create release ${{ needs.build_init.outputs.version }}
         uses: actions/create-release@v1
         id: create_release
@@ -104,21 +104,21 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       -
         name: Setup go
-        uses: actions/setup-go@v4.0.0
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.build_init.outputs.go_version }}
       -
         name: Download linux zip artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: linux-zip
           path: build/
       -
         name: Download osx zip artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: osx-zip
           path: build/
